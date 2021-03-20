@@ -2,8 +2,12 @@
   <div class="home">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-5">
+        <div class="col-sm-3 logo">
+          <img class="img-fluid" src="@/assets/pokesearch_text.png">
+        </div>
+        <div class="col-sm-5 ml-auto barrabusca">
           <ProcuraPokemon
+          class="buscar"
           :urlApi="urlApi"
           @definirUrlPokemon="definirUrlPokemon"/>
         </div>
@@ -57,3 +61,10 @@ export default {
   }
 }
 </script>
+<style scoped>
+.buscar
+{
+  margin-top:20px;
+  float: right;
+}
+</style>
