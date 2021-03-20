@@ -1,4 +1,17 @@
 <template>
+<div>
+    <div class="row">
+        <div class="col-sm-3 offset-sm-3">
+            <p class="botao" 
+            v-if="botaoante"
+            @click="paginaAnterior">Anterior</p>
+        </div>
+        <div class="col-sm-3">
+            <p class="botao" 
+            v-if="botaoprox"
+            @click="proximaPagina">Proximo</p>
+        </div>
+    </div>
     <div class="row">
         <div class="col-sm-6 offset-sm-3">
             <div class="pokelist list">
@@ -11,6 +24,8 @@
             </div>
         </div>
     </div>
+</div>
+    
 </template>
 <script>
 
@@ -25,18 +40,30 @@ export default {
         return {
             pokemons: [],
             urlprox: '',
-            urlatual: ''
+            urlAnterior: '',
+            urlatual: '',
+            botaoprox: false,
+            botaoante: false
         }
     },
     methods: {
         fetchData(){
-            let req = new Request(this.urlApi);
+            let req = new Request(this.urlatual);
             fetch(req)
                 .then((resp)=>{
                     if(resp.status === 200) return resp.json();
                 })
                 .then((data)=>{
-                    this.urlprox = data.next;
+                    if(data.next !== null)
+                    {
+                        this.urlprox = data.next;
+                        this.botaoprox = true;
+                    }
+                    if(data.previous !== null)
+                    {
+                        this.urlAnterior = data.previous;
+                        this.botaoante = true;
+                    }
                     data.results.forEach(pokemon => {
                         pokemon.id = pokemon.url.split('/')
                         .filter(function(part) { return !!part }).pop();
@@ -50,15 +77,82 @@ export default {
         definirUrlPokemon(url)
         {
             this.$emit('definirUrlPokemon',url);
+        },
+        proximaPagina()
+        {
+            this.urlatual = this.urlprox;
+            this.pokemons = [];
+            this.urlprox = null;
+            this.botaoprox = false;
+            this.botaoante = false;
+            this.urlAnterior = null;
+            let req = new Request(this.urlatual);
+            fetch(req)
+                .then((resp)=>{
+                    if(resp.status === 200) return resp.json();
+                })
+                .then((data)=>{
+                    if(data.next !== null)
+                    {
+                        this.urlprox = data.next;
+                        this.botaoprox = true;
+                    }
+                    if(data.previous !== null)
+                    {
+                        this.urlAnterior = data.previous;
+                        this.botaoante = true;
+                    }
+                    data.results.forEach(pokemon => {
+                        pokemon.id = pokemon.url.split('/')
+                        .filter(function(part) { return !!part }).pop();
+                        this.pokemons.push(pokemon);
+                    });
+                })
+                .catch((erro) =>{
+                    console.log(erro);
+                })
+
+        },
+        paginaAnterior()
+        {
+            this.urlatual = this.urlAnterior;
+            this.pokemons = [];
+            this.urlprox = null;
+            this.botaoprox = false;
+            this.botaoante = false;
+            this.urlAnterior = null;
+            let req = new Request(this.urlatual);
+            fetch(req)
+                .then((resp)=>{
+                    if(resp.status === 200) return resp.json();
+                })
+                .then((data)=>{
+                    if(data.next !== null)
+                    {
+                        this.urlprox = data.next;
+                        this.botaoprox = true;
+                    }
+                    if(data.previous !== null)
+                    {
+                        this.urlAnterior = data.previous;
+                        this.botaoante = true;
+                    }
+                    data.results.forEach(pokemon => {
+                        pokemon.id = pokemon.url.split('/')
+                        .filter(function(part) { return !!part }).pop();
+                        this.pokemons.push(pokemon);
+                    });
+                })
+                .catch((erro) =>{
+                    console.log(erro);
+                })
         }
     },
-    prox()
-    {
-        this.urlatual = this.urlprox;
-        this.fetchData();
-    },
     created() {
-        this.urlatual = this.urlApi;
+        if(this.urlatual === '')
+        {
+            this.urlatual = this.urlApi;
+        }
         this.fetchData();
     }
 }
@@ -87,5 +181,17 @@ article
 h3
 {
     margin: 0;
+}
+.botao
+{
+    background-color: rgba(90, 224, 146, 0.933);
+    color:#FFFFFF;
+    border-radius: 5px;
+    font-size: 1.50rem;
+    cursor: pointer;
+}
+.botao:hover
+{
+    background-color: rgba(224, 90, 90, 0.933);   
 }
 </style>
